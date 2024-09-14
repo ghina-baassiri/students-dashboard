@@ -1,10 +1,13 @@
-let students = [];
+document.addEventListener('DOMContentLoaded', async function() {
+  renderStudents();
+});
+
+let _students = [];
 
     async function addStudent() {
       const name = document.getElementById('studentName').value;
       const dob = document.getElementById('dob').value;
       const address = document.getElementById('address').value;
-
       try {
         if (studentName && dob && address) {
             const student = {
@@ -19,22 +22,22 @@ let students = [];
             renderStudents();
         }
       } catch (error) {
-        
+        console.log("Error", error)
       }
              
     }
 
-    function renderStudents() {
+    async function renderStudents() {
       try {
-        students = fetchStudents();
-
+        _students = await fetchStudents();
+        
         const studentList = document.getElementById('studentList');
         studentList.innerHTML = ''; 
 
-        students.forEach((student, index) => {
+        _students.forEach((student, index) => {
             studentList.innerHTML += `
             <tr>
-                <td>${student.studentName}</td>
+                <td>${student.name}</td>
                 <td>${student.dob}</td>
                 <td>${student.address}</td>
                 <td style="display: flex; align-items: center;">
@@ -55,30 +58,15 @@ let students = [];
       
     }
 
-    function updateStudent(index) {
-      const student = students[index];
-      const updatedName = prompt("Update Student Name:", student.studentName);
-      const updatedDob = prompt("Update Date of Birth:", student.dob);
-      const updatedAddress = prompt("Update Address:", student.address);
-
-      if (updatedName && updatedFamilyName && updatedDob && updatedAddress) {
-        students[index] = {
-          studentName: updatedName,
-          dob: updatedDob,
-          address: updatedAddress
-        };
-        renderStudents();
-      }
+    async function updateStudent(index) {
+      await updateStudent(index)
+      renderStudents();
     }
-
+    
     function confirmDeleteStudent(index) {
         const isConfirmed = confirm("Are you sure you want to delete this student?");
         if (isConfirmed) {
           deleteStudent(index);
+          renderStudents();
         }
-    }
-
-    function deleteStudent(index) {
-      students.splice(index, 1);
-      renderStudents();
     }

@@ -6,8 +6,11 @@ let students = [];
 async function fetchStudents() {
   try {
     const response = await fetch(`${baseURL}/`);
-    students = await response.json();
-    return students;
+    if (response.ok) {
+      students = await response.json();
+      return students;
+    }
+  
   } catch (error) {
     console.error('Error fetching students:', error);
     return [];
@@ -23,7 +26,6 @@ async function createStudent(student) {
       dob,
       address
     };
-
     try {
       const response = await fetch(`${baseURL}/addStudent`, {
         method: 'POST',
@@ -34,7 +36,7 @@ async function createStudent(student) {
       });
 
       if (response.ok) {
-        console.error('Successfully added student');
+        console.log('Successfully added student');
 
       }
     } catch (error) {
@@ -63,11 +65,13 @@ async function updateStudent(index) {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({name: student.name, updateFields: updatedStudent})
+        body: JSON.stringify({ name: student.name, updateFields: updatedStudent })
       });
 
       if (response.ok) {
-        console.error('Successfully updated student');
+        console.log('Successfully updated student');
+        students[index] = { ...student, ...updatedStudent };
+        updateTableRow(index);
       }
     } catch (error) {
       console.error('Error updating student:', error);
@@ -75,26 +79,32 @@ async function updateStudent(index) {
   }
 }
 
+function updateTableRow(index) {
+  const studentList = document.getElementById('studentList');
+  const studentRow = studentList.children[index]; // Assuming rows are direct children
+
+  studentRow.children[0].textContent = students[index].name;
+  studentRow.children[1].textContent = students[index].dob;
+  studentRow.children[2].textContent = students[index].address;
+}
 
 // Delete student from the API
-async function deleteStudent(index, name) {
+async function deleteStudent(index) {
   const student = students[index];
+  
   try {
     const response = await fetch(`${baseURL}/deleteStudentByName`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({name})
+      body: JSON.stringify({name: student.name})
     });
 
     if (response.ok) {
-        console.error('Successfully deleted student');
+        console.log('Successfully deleted student');
     }
   } catch (error) {
     console.error('Error deleting student:', error);
   }
 }
-
-// Initialize the student list on page load
-document.addEventListener('DOMContentLoaded', fetchStudents);
